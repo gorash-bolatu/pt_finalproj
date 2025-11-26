@@ -4,6 +4,7 @@ __pycache__/
 *.pkl
 data/raw/
 data/processed/
+*.db
 models/
 .ipynb_checkpoints/
 *.docx

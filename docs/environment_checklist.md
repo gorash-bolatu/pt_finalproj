@@ -32,7 +32,7 @@ project/
 
 ```bash
 pip install --upgrade pip
-pip install pandas numpy scikit-learn tensorflow langdetect spacy nltk joblib django mysqlclient sqlalchemy jupyterlab pytest
+pip install pandas numpy scikit-learn tensorflow langdetect spacy nltk joblib django djangorestframework mysqlclient sqlalchemy jupyterlab langid pytest
 ```
 
 ### Save dependency list
