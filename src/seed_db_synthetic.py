@@ -1,72 +1,121 @@
 import os
 import random
-import hashlib
 import pandas as pd
+from sqlalchemy import text
 from sqlalchemy.orm import sessionmaker
-from db import engine, Base  # db.py defines Product, Review, User via ORM
+from db import engine, Base  # db.py must define Base + ORM models mapped to your MySQL schema
 
+# Ensure tables exist
 Base.metadata.create_all(engine)
+
 Session = sessionmaker(bind=engine)
 
-PROCESSED = os.path.join("data", "processed", "train_clean.csv")  # or test_clean.csv
+PROCESSED = os.path.join("data", "processed", "train_clean.csv")
+
 NUM_PRODUCTS = 2000
 NUM_USERS = 5000
 SEED = 42
 random.seed(SEED)
 
+
+# Synthetic Generators
 def gen_product_list(n):
-    # create simple product entries
     products = []
     for i in range(n):
-        pid = f"P{100000+i}"
-        products.append({"id": pid, "title": f"Synth Product {i}", "category": "misc"})
+        products.append({
+            "name": f"Synth Product {i}",
+            "category": "misc",
+            "description": f"Auto-generated product description {i}"
+        })
     return products
+
 
 def gen_users(n):
     users = []
     for i in range(n):
-        uid = f"U{10000+i}"
-        users.append({"username": uid, "language": "unknown"})
+        users.append({
+            "username": f"user_{i}",
+            "language": "unknown"
+        })
     return users
 
+
+# Seeding Logic
 def seed_synthetic():
     session = Session()
+
+    # 1. Insert Products
+    print("Inserting products...")
     products = gen_product_list(NUM_PRODUCTS)
+
+    insert_product_sql = text("""
+        INSERT INTO Product (name, category, description)
+        VALUES (:name, :category, :description)
+    """)
+
+    for p in products:
+        session.execute(insert_product_sql, p)
+
+    session.commit()
+
+    # Fetch assigned AUTO_INCREMENT IDs
+    product_ids = [row[0] for row in session.execute(text("SELECT id FROM Product")).fetchall()]
+    print(f"Inserted {len(product_ids)} products.")
+
+    # 2. Insert Users
+    print("Inserting users...")
     users = gen_users(NUM_USERS)
 
-    # Bulk insert via raw SQL for speed (or use ORM)
-    for p in products:
-        session.execute(
-            "INSERT IGNORE INTO Product (id, title, category, price) VALUES (%s,%s,%s,%s)",
-            (p['id'], p['title'], p['category'], None)
-        )
+    insert_user_sql = text("""
+        INSERT INTO User (username, language)
+        VALUES (:username, :language)
+    """)
+
     for u in users:
-        session.execute(
-            "INSERT IGNORE INTO User (username, language) VALUES (%s,%s)",
-            (u['username'], u['language'])
-        )
+        session.execute(insert_user_sql, u)
+
     session.commit()
 
-    # load processed reviews and assign random user/product
+    user_ids = [row[0] for row in session.execute(text("SELECT id FROM User")).fetchall()]
+    print(f"Inserted {len(user_ids)} users.")
+
+    # 3. Insert Reviews
+    print("Loading processed reviews...")
     df = pd.read_csv(PROCESSED)
-    df = df.dropna(subset=['text']).reset_index(drop=True)
+    df = df.dropna(subset=["text"]).reset_index(drop=True)
+
+    insert_review_sql = text("""
+        INSERT INTO Review (user_id, product_id, title, text, language, created_at)
+        VALUES (:user_id, :product_id, :title, :text, :language, NOW())
+    """)
+
     for idx, row in df.iterrows():
-        product_choice = random.choice(products)['id']
-        user_choice = random.choice(users)['username']
-        title = (row.get('text')[:80])  # use first part as title
-        text = row['text']
-        # rating -> use score if exists else map from sentiment
-        rating = float(row.get('score') if 'score' in row and not pd.isna(row.get('score')) else (5 if row['sentiment']=='positive' else 1))
+        user_id = random.choice(user_ids)
+        product_id = random.choice(product_ids)
+
+        title = row["text"][:80]
+        language = row.get("language", "unknown")
+
         session.execute(
-            "INSERT INTO Review (user_id, product_id, title, text, language, created_at) VALUES (%s,%s,%s,%s,%s,NOW())",
-            (user_choice, product_choice, title, text, row.get('language','unknown'))
+            insert_review_sql,
+            {
+                "user_id": user_id,
+                "product_id": product_id,
+                "title": title,
+                "text": row["text"],
+                "language": language
+            }
         )
-        if (idx+1) % 10000 == 0:
+
+        if (idx + 1) % 5000 == 0:
             session.commit()
-            print("Inserted", idx+1, "reviews")
+            print(f"Inserted {idx + 1} reviews...")
+
     session.commit()
     session.close()
-    print("Synthetic seeding done.")
+
+    print("Synthetic database seeding complete.")
+
 
 if __name__ == "__main__":
     seed_synthetic()
