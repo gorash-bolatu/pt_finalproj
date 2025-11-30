@@ -1,9 +1,5 @@
 from django.db import models
 
-# sentiment_app/reviews/models.py   (or sentiment_app/products/models.py)
-
-from django.db import models
-
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=120, unique=True, blank=True)
