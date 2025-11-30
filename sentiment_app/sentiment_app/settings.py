@@ -74,15 +74,20 @@ WSGI_APPLICATION = 'sentiment_app.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-       'default': {
-           'ENGINE': 'django.db.backends.mysql',
-           'NAME': 'sentiment_db',
-           'USER': 'sentiment_user',
-           'PASSWORD': 'new_password',
-           'HOST': 'localhost',
-           'PORT': '3306',
-       }
-   }
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',  # MySQL
+        'NAME': 'sentiment_db',
+        'USER': 'root',
+        'PASSWORD': 'new_password',
+        'HOST': 'localhost',
+        'PORT': '3306',
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
+    }
+}
+
 
 
 # Password validation
