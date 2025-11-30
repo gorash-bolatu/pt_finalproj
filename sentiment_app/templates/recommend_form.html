@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Get a Recommendation</h2>
+  {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+  <form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="text" class="form-label">Describe what you like / don't like</label>
+      <textarea class="form-control" id="text" name="text" rows="4"></textarea>
+    </div>
+    <button class="btn btn-primary" type="submit">Recommend</button>
+  </form>
+{% endblock %}

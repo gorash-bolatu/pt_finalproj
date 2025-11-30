@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Home - SentimentApp{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-8">
+      <h1>Welcome to SentimentApp</h1>
+      <p>Quick demo of sentiment + product recommendations.</p>
+
+      <h4>Featured products</h4>
+      <div class="row">
+        {% for p in featured %}
+          <div class="col-sm-4 mb-3">
+            <div class="card h-100">
+              <div class="card-body">
+                <h5>{{ p.name }}</h5>
+                <p>{{ p.short_description }}</p>
+                <a class="btn btn-sm btn-primary" href="{% url 'product_detail' p.id %}">View</a>
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <p>No products yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <!-- include the original reviews/home.html test text box here -->
+      {% include "reviews/home.html" %}
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,21 @@
+<h2>Analyze Your Review</h2>
+
+<form method="post">
+    {% csrf_token %}
+    <textarea name="text" rows="3" cols="60" placeholder="Type your review here"></textarea>
+    <br>
+    <button type="submit">Analyze</button>
+</form>
+
+{% if sentiment %}
+    <h3>Sentiment: {{ sentiment }}</h3>
+{% endif %}
+
+{% if recommendation %}
+    <h3>Recommended Product:</h3>
+    <div>
+        <strong>{{ recommendation.name }}</strong><br>
+        Price: ${{ recommendation.price }}<br>
+        Rating: {{ recommendation.rating }} ⭐
+    </div>
+{% endif %}

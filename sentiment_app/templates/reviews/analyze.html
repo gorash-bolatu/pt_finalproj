@@ -1,0 +1,16 @@
+<h1>Analyze Sentiment</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <textarea name="review_text" placeholder="Write your review..."></textarea>
+    <select name="model_name">
+        <option value="nb">Naive Bayes</option>
+        <option value="svm" selected>SVM</option>
+        <option value="lstm">LSTM</option>
+    </select>
+    <button type="submit">Analyze</button>
+</form>
+
+{% if result %}
+<p>Predicted sentiment: {{ result }}</p>
+{% endif %}
