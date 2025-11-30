@@ -1,12 +1,19 @@
 # reviews/views.py
 from django.shortcuts import render
 from .ml import analyze_sentiment
+from .models import Product
 
+def product_list(request):
+    products = Product.objects.all()
+    return render(request, "products/list.html", {"products": products})
+
+def recommend_view(request):
+    return render(request, "recommendations/result.html", {})
 
 def home(request):
     result = None
     user_text = ""
-    model_choice = "nb"  # модель по умолчанию
+    model_choice = "nb"  # default model
 
     if request.method == "POST":
         user_text = request.POST.get("review_text", "")
