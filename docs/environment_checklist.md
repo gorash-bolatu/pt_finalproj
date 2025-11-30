@@ -115,11 +115,7 @@ Launch notebook environment:
 jupyter lab
 ```
 
-Use Jupyter for:
-
-* data exploration
-* preprocessing
-* model training/testing
+Use Jupyter for matplotlib visualization and quick sandboxing.
 
 ## **8. Version Control Setup**
 
@@ -129,7 +125,7 @@ Use Jupyter for:
 git init
 ```
 
-### Add `.gitignore` (recommended includes)
+### Add `.gitignore`
 
 ```
 venv/
