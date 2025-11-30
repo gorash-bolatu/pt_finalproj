@@ -1,41 +1,28 @@
+# reviews/views.py
 from django.shortcuts import render
-from rest_framework import generics
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from .models import User, Product, Review, Sentiment, Recommendation
-from .serializers import (
-    UserSerializer, ProductSerializer, ReviewSerializer,
-    SentimentSerializer, RecommendationSerializer
-)
-
-import joblib
+from .ml import analyze_sentiment
 
 
-# Load ML model on first import
-model = joblib.load("models/best_model.pkl")
-vectorizer = joblib.load("models/tfidf.pkl")
+def home(request):
+    result = None
+    user_text = ""
+    model_choice = "nb"  # модель по умолчанию
 
+    if request.method == "POST":
+        user_text = request.POST.get("review_text", "")
+        model_choice = request.POST.get("model_choice", "nb")
 
-class ReviewCreateView(generics.CreateAPIView):
-    queryset = Review.objects.all()
-    serializer_class = ReviewSerializer
+        if user_text.strip():
+            result = analyze_sentiment(user_text, model_type=model_choice)
 
-
-@api_view(["POST"])
-def analyze_sentiment(request):
-    text = request.data.get("text")
-    if not text:
-        return Response({"error": "No text provided"}, status=400)
-
-    X = vectorizer.transform([text])
-    pred = model.predict(X)[0]
-
-    return Response({"sentiment": pred})
-
-
-@api_view(["GET"])
-def user_recommendations(request, user_id):
-    recs = Recommendation.objects.filter(user_id=user_id)
-    serializer = RecommendationSerializer(recs, many=True)
-    return Response(serializer.data)
-
+    context = {
+        "result": result,
+        "user_text": user_text,
+        "model_choice": model_choice,
+        "available_models": [
+            ("nb", "Naive Bayes"),
+            ("svm", "SVM"),
+            ("lstm", "LSTM"),
+        ],
+    }
+    return render(request, "reviews/home.html", context)

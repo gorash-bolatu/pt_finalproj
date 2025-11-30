@@ -1,0 +1,13 @@
+{
+  "model": "naive_bayes",
+  "tfidf_params": {
+    "max_features": 105000,
+    "ngram_range": [
+      1,
+      2
+    ]
+  },
+  "random_state": 42,
+  "max_samples": null,
+  "test_size": 0.1
+}

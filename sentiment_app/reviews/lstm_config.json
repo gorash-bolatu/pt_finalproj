@@ -1,0 +1,12 @@
+{
+  "model": "lstm",
+  "max_vocab": 30000,
+  "max_len": 200,
+  "embedding_dim": 128,
+  "lstm_units": 128,
+  "batch_size": 128,
+  "epochs": 7,
+  "random_state": 42,
+  "max_samples": null,
+  "test_size": 0.1
+}
