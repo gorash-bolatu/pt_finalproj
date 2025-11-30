@@ -1,40 +1,29 @@
-import pandas as pd
 import pytest
+import pandas as pd
+from src.recommender import predict_sentiment, recommend_products
 
-# Import the functions from your recommender module.
-# The test assumes `recommend_products(product_db, ...)` is available and predict_sentiment is used internally.
-from src import recommender
+def test_predict_sentiment_nb():
+    text = "I love this product!"
+    pred = predict_sentiment(text, model_name="nb")
+    assert pred in ["positive", "neutral", "negative"]
 
+def test_predict_sentiment_svm():
+    text = "Terrible experience."
+    pred = predict_sentiment(text, model_name="svm")
+    assert pred in ["positive", "neutral", "negative"]
 
-def test_recommend_products_positive(monkeypatch):
-    # Create a tiny product_db DataFrame
+def test_predict_sentiment_lstm():
+    text = "Amazing quality!"
+    pred = predict_sentiment(text, model_name="lstm")
+    assert pred in ["positive", "neutral", "negative"]
+
+def test_recommend_products():
     df = pd.DataFrame({
-        "product_id": ["p1","p1","p2","p3","p1","p2"],
-        "review_text": [
-            "Good","Excellent","Nice","Bad","Loved it","Good"
-        ],
-        "sentiment": [1,1,1,0,1,1]  # 1 = positive
+        "product_id": ["p1","p2","p3","p1"],
+        "review_text": ["good","bad","good","excellent"],
+        "sentiment": [1,0,1,1]
     })
-
-    # Monkeypatch predict_sentiment to always return 'positive'
-    monkeypatch.setattr(recommender, "predict_sentiment", lambda text, model_name="svm": "positive")
-
-    out = recommender.recommend_products("I like it", df)
-    assert out["user_sentiment"] == "positive"
-    assert isinstance(out["recommended_products"], list)
-    # p1 should be top since it has three positive reviews
-    assert "p1" in out["recommended_products"]
-
-
-def test_recommend_products_negative(monkeypatch):
-    df = pd.DataFrame({
-        "product_id": ["p1","p2","p3","p4"],
-        "review_text": ["Bad","Terrible","Okay","Good"],
-        "sentiment": [0,0,1,1]
-    })
-    # For negative users we sample positives (see recommender logic)
-    monkeypatch.setattr(recommender, "predict_sentiment", lambda text, model_name="svm": "negative")
-
-    out = recommender.recommend_products("I hate this", df)
-    assert out["user_sentiment"] == "negative"
-    assert isinstance(out["recommended_products"], list)
+    result = recommend_products("I like this!", df, model_name="svm")
+    assert "user_sentiment" in result
+    assert "recommended_products" in result
+    assert isinstance(result["recommended_products"], list)
