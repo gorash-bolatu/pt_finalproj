@@ -3,7 +3,6 @@ __pycache__/
 *.pyc
 *.pkl
 *.db
-models/
 .ipynb_checkpoints/
 *.docx
 *.tmp

@@ -1,0 +1,19 @@
+{
+  "model": "svm",
+  "tfidf_params": {
+    "max_features": 80000,
+    "ngram_range": [
+      1,
+      2
+    ]
+  },
+  "svm_params": {
+    "C": 1.0,
+    "max_iter": 5000,
+    "class_weight": "balanced",
+    "random_state": 42
+  },
+  "random_state": 42,
+  "max_samples": null,
+  "test_size": 0.1
+}
